@@ -10,19 +10,19 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { UserList } from '../UserList';
 
 // MSWサーバーとハンドラーのインポート
-import { server } from '../../mocks/server';
-import { 
+import { server } from '@/mocks/server';
+import {
   mockUsers,
   mswMockUsers,
-  errorHandlers, 
+  errorHandlers,
   specialHandlers,
   createRequestCaptureHandler,
-  createCustomResponseHandler
-} from '../../mocks/handlers';
+  createCustomResponseHandler,
+} from '@/mocks/handlers';
 
 /**
  * UserListコンポーネントのテストスイート
- * 
+ *
  * MSWハンドラーパターンを使用した実装
  * - グローバルセットアップで基本的なモックサーバーは起動済み
  * - 各テストで必要に応じてハンドラーを上書き
@@ -163,9 +163,12 @@ describe('UserList - MSW拡張テスト', () => {
     expect(skeletons.length).toBe(3);
 
     // データが最終的に表示されることを確認
-    await waitFor(() => {
-      expect(screen.getByText('佐藤次郎')).toBeInTheDocument();
-    }, { timeout: 2000 }); // タイムアウトを延長
+    await waitFor(
+      () => {
+        expect(screen.getByText('佐藤次郎')).toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    ); // タイムアウトを延長
   });
 
   /**
@@ -181,9 +184,12 @@ describe('UserList - MSW拡張テスト', () => {
     expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument();
 
     // データ表示の確認
-    await waitFor(() => {
-      expect(screen.getByText('佐藤次郎')).toBeInTheDocument();
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText('佐藤次郎')).toBeInTheDocument();
+      },
+      { timeout: 1000 },
+    );
   });
 
   /**
@@ -198,7 +204,7 @@ describe('UserList - MSW拡張テスト', () => {
       // ローディングが終了していることを確認
       const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
       expect(skeletons.length).toBe(0);
-      
+
       // カードが表示されていないことを確認
       const cards = container.querySelectorAll('[class*="card"]');
       expect(cards.length).toBe(0);
@@ -215,7 +221,7 @@ describe('UserList - MSW拡張テスト', () => {
     server.use(
       createRequestCaptureHandler((request) => {
         capturedRequest = request;
-      })
+      }),
     );
 
     render(<UserList />);
@@ -236,9 +242,7 @@ describe('UserList - MSW拡張テスト', () => {
    * テスト8: カスタムレスポンスのテスト
    */
   it('カスタムレスポンスを返す', async () => {
-    const customData = [
-      { id: 999, name: 'カスタムユーザー', email: 'custom@example.com' }
-    ];
+    const customData = [{ id: 999, name: 'カスタムユーザー', email: 'custom@example.com' }];
 
     // カスタムレスポンスハンドラーを使用
     server.use(createCustomResponseHandler(customData));
@@ -271,23 +275,23 @@ describe('UserList - MSW拡張テスト', () => {
 
 /**
  * MSWハンドラーパターンのメリット：
- * 
+ *
  * 1. コードの整理
  *    - ハンドラーが一箇所に集約され、管理しやすい
  *    - テストファイルがすっきりする
- * 
+ *
  * 2. 再利用性
  *    - 同じハンドラーを複数のテストで使い回せる
  *    - エラーパターンの共通化
- * 
+ *
  * 3. 保守性
  *    - APIの仕様変更時の修正が容易
  *    - モックデータの一元管理
- * 
+ *
  * 4. 拡張性
  *    - 新しいハンドラーの追加が簡単
  *    - カスタムハンドラーの作成も容易
- * 
+ *
  * 5. チーム開発
  *    - モックの仕様が明確
  *    - 開発環境でも同じモックを使用可能
@@ -295,12 +299,12 @@ describe('UserList - MSW拡張テスト', () => {
 
 /**
  * グローバルセットアップとの連携：
- * 
+ *
  * vitest.setup.tsで以下が設定済み：
  * - beforeAll: サーバーの起動
  * - afterEach: ハンドラーのリセット
  * - afterAll: サーバーの停止
- * 
+ *
  * そのため、各テストファイルでは
  * セットアップ/クリーンアップ処理が不要
  */
