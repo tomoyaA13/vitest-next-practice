@@ -6,7 +6,7 @@
 
 // ========== インポート ==========
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 // userEvent: より実際のユーザー操作に近いイベントシミュレーション
 // fireEventよりも推奨される方法（キーボード入力の遅延等を考慮）
@@ -56,18 +56,39 @@ describe('LoginForm', () => {
     await user.click(submitButton);
 
     // ========== Assert（検証）==========
-    // React Hook Formの非同期バリデーションを待つ
-    await waitFor(() => {
-      // モック関数が呼ばれたことを確認
-      expect(handleSubmit).toHaveBeenCalled();
+    // オプション1: waitForを使う場合（テストが不安定な場合）
+    // await waitFor(() => {
+    //   expect(handleSubmit).toHaveBeenCalled();
+    // });
 
-      // React Hook Formは内部的に (data, event) の形式で
-      // onSubmitハンドラーを呼び出すため、最初の引数のみを検証
-      expect(handleSubmit.mock.calls[0][0]).toEqual({
+    // オプション2: 直接アサーション（推奨）
+    // 最新のuserEventは非同期処理を待つため、通常はwaitForは不要
+    expect(handleSubmit).toHaveBeenCalled();
+    expect(handleSubmit).toHaveBeenCalledTimes(1);
+    
+    // toHaveBeenCalledWithの詳細解説：
+    // React Hook Formは、onSubmitハンドラーを呼び出す際に2つの引数を渡します：
+    // 第1引数: フォームデータのオブジェクト
+    // 第2引数: Reactのイベントオブジェクト（SyntheticEvent）
+    expect(handleSubmit).toHaveBeenCalledWith(
+      // 第1引数: 期待されるフォームデータ
+      {
         email: 'test@example.com',
         password: 'password123',
-      });
-    });
+      },
+      // 第2引数: イベントオブジェクト
+      // expect.any(Object)は「任意のオブジェクト」にマッチするマッチャー
+      // イベントオブジェクトの詳細な内容は重要でないため、
+      // 「何らかのオブジェクトが渡されていること」だけを確認
+      expect.any(Object)
+    );
+    
+    // 別の検証方法（参考）：
+    // 第1引数のみを検証したい場合は、以下のようにも書ける
+    // expect(handleSubmit.mock.calls[0][0]).toEqual({
+    //   email: 'test@example.com',
+    //   password: 'password123',
+    // });
   });
 
   /**
@@ -92,7 +113,7 @@ describe('LoginForm', () => {
     expect(handleSubmit).not.toHaveBeenCalled();
 
     // エラーメッセージの表示を確認
-    // findByTextは要素が現れるまで待機するため、waitForは不要
+    // findByTextは要素が現れるまで待機するため、waitForは不要 (https://testing-library.com/docs/dom-testing-library/api-async/)
     expect(await screen.findByText('有効なメールアドレスを入力してください')).toBeInTheDocument();
     expect(await screen.findByText('パスワードは8文字以上である必要があります')).toBeInTheDocument();
   });
@@ -124,7 +145,7 @@ describe('LoginForm', () => {
 
     // メールアドレスのエラーメッセージが表示されることを確認
     expect(await screen.findByText('有効なメールアドレスを入力してください')).toBeInTheDocument();
-    
+
     // パスワードのエラーは表示されないことを確認
     expect(screen.queryByText('パスワードは8文字以上である必要があります')).not.toBeInTheDocument();
   });
@@ -174,7 +195,7 @@ describe('LoginForm', () => {
 
     // パスワードのエラーメッセージが表示されることを確認
     expect(await screen.findByText('パスワードは8文字以上である必要があります')).toBeInTheDocument();
-    
+
     // メールアドレスのエラーは表示されないことを確認
     expect(screen.queryByText('有効なメールアドレスを入力してください')).not.toBeInTheDocument();
   });
@@ -214,13 +235,29 @@ describe('LoginForm', () => {
     await user.click(submitButton);
 
     // ========== Assert（検証）==========
-    await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalled();
-      expect(handleSubmit.mock.calls[0][0]).toEqual({
+    // エラー修正後の送信も同様に、waitForは通常不要
+    expect(handleSubmit).toHaveBeenCalled();
+    expect(handleSubmit).toHaveBeenCalledTimes(1);
+    
+    // toHaveBeenCalledWithの解説（再掲）：
+    // このメソッドは、モック関数が特定の引数で呼び出されたことを検証
+    expect(handleSubmit).toHaveBeenCalledWith(
+      // 第1引数: フォームデータ（厳密に一致することを確認）
+      {
         email: 'test@example.com',
         password: 'password123',
-      });
-    });
+      },
+      // 第2引数: Reactのイベントオブジェクト
+      // expect.any(Object)はJest/Vitestのマッチャーで、
+      // 「任意のオブジェクト型の値」を許容
+      // 他のマッチャー例: expect.any(String), expect.any(Number), expect.any(Function)
+      expect.any(Object)
+    );
+    
+    // 補足: expect.any(Object)を使う理由
+    // Reactのイベントオブジェクトは複雑で、
+    // テスト毎に内容が変わる可能性があるため、
+    // 「オブジェクトが渡されたこと」だけを検証するのが一般的
   });
 });
 
@@ -230,6 +267,7 @@ describe('LoginForm', () => {
  * 1. userEventの使用
  *    - fireEventよりも実際のユーザー操作に近い
  *    - キーボード入力の遅延やフォーカス管理を適切に処理
+ *    - v14以降は内部的に非同期処理を待機するため、waitForは通常不要
  *
  * 2. 非同期バリデーションへの対応
  *    - React Hook Formは非同期でバリデーションを実行
@@ -240,17 +278,32 @@ describe('LoginForm', () => {
  *    - findByText: 要素が表示されるまで待機
  *    - queryByText: 要素が存在しないことを確認
  *
- * 4. フォーム送信時の引数
+ * 4. フォーム送信時の検証
  *    - React Hook Formは (data, event) の形式で呼び出す
- *    - 最初の引数（data）のみを検証
+ *    - toHaveBeenCalledWithを使用して正確に検証
+ *    - expect.any(Object)でeventオブジェクトを柔軟に検証
  *
- * 5. バリデーションモード
+ * 5. expect.anyマッチャーの使用例
+ *    - expect.any(Object): 任意のオブジェクト
+ *    - expect.any(String): 任意の文字列
+ *    - expect.any(Number): 任意の数値
+ *    - expect.any(Function): 任意の関数
+ *    - expect.any(Array): 任意の配列
+ *    - expect.any(Date): 任意の日付オブジェクト
+ *
+ * 6. バリデーションモード
  *    - mode: 'onChange' でリアルタイムバリデーション
  *    - mode: 'onSubmit' で送信時のみバリデーション
  *
- * 6. デバッグテクニック
+ * 7. デバッグテクニック
  *    - screen.debug()でレンダリング結果を確認
  *    - findByTextなどの非同期クエリは自動的にタイムアウトエラーを表示
+ *
+ * 8. waitForが必要なケース
+ *    - API呼び出し後のUI更新を待つ場合
+ *    - タイマーやディバウンス処理が含まれる場合
+ *    - テストが不安定でタイミングの問題が発生する場合
+ *    - 但し、通常のフォーム送信では必要ないことが多い
  */
 
 /**
