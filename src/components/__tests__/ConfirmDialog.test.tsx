@@ -17,28 +17,30 @@ import { ConfirmDialog } from '../ConfirmDialog';
 
 /**
  * ConfirmDialogコンポーネントのテストスイート
- * 
+ *
  * このコンポーネントは以下の機能を持つ：
  * - 開閉状態の管理（open prop）
  * - 確認・キャンセルのアクション
  * - カスタマイズ可能なタイトルと説明文
  */
+
 describe('ConfirmDialog', () => {
   /**
    * テスト1: ダイアログの表示確認
    * openプロパティがtrueの時、ダイアログが表示されることを検証
    */
+
   it('openがtrueの時に表示されること', () => {
     // ========== Arrange（準備）==========
     // ダイアログに必要な全てのpropsを設定してレンダリング
     render(
       <ConfirmDialog
-        open={true}                           // ダイアログを開いた状態に
-        onOpenChange={vi.fn()}               // 開閉状態変更のハンドラー（モック）
-        onConfirm={vi.fn()}                  // 確認ボタンのハンドラー（モック）
-        title='削除の確認'                    // ダイアログのタイトル
-        description='本当に削除しますか？'     // ダイアログの説明文
-      />
+        open={true} // ダイアログを開いた状態に
+        onOpenChange={vi.fn()} // 開閉状態変更のハンドラー（モック）
+        onConfirm={vi.fn()} // 確認ボタンのハンドラー（モック）
+        title='削除の確認' // ダイアログのタイトル
+        description='本当に削除しますか？' // ダイアログの説明文
+      />,
     );
 
     // ========== Assert（検証）==========
@@ -52,19 +54,20 @@ describe('ConfirmDialog', () => {
    * テスト2: 確認ボタンの動作確認
    * 確認ボタンをクリックした時、onConfirmハンドラーが呼ばれることを検証
    */
+
   it('確認ボタンをクリックするとonConfirmが呼ばれること', async () => {
     // ========== Arrange（準備）==========
     // onConfirmハンドラーをモック化
     const handleConfirm = vi.fn();
-    
+
     render(
       <ConfirmDialog
         open={true}
         onOpenChange={vi.fn()}
-        onConfirm={handleConfirm}              // モック関数を渡す
+        onConfirm={handleConfirm} // モック関数を渡す
         title='削除の確認'
         description='本当に削除しますか？'
-      />
+      />,
     );
 
     // ========== Act（実行）==========
@@ -91,22 +94,21 @@ describe('ConfirmDialog', () => {
     // onOpenChangeハンドラーをモック化
     // このハンドラーは開閉状態の変更時に呼ばれる
     const handleOpenChange = vi.fn();
-    
+
     render(
       <ConfirmDialog
         open={true}
-        onOpenChange={handleOpenChange}        // モック関数を渡す
+        onOpenChange={handleOpenChange}
         onConfirm={vi.fn()}
-        title='削除の確認'
-        description='本当に削除しますか？'
-      />
+        title={'削除の確認'}
+        description={'本当に削除しますか?'}
+      />,
     );
 
     // ========== Act（実行）==========
     // 「キャンセル」ボタンを取得してクリック
     const cancelButton = screen.getByRole('button', { name: 'キャンセル' });
     fireEvent.click(cancelButton);
-
     // ========== Assert（検証）==========
     // 非同期処理の完了を待つ
     await waitFor(() => {
@@ -119,23 +121,23 @@ describe('ConfirmDialog', () => {
 
 /**
  * Shadcn UIコンポーネントをテストする際のポイント：
- * 
+ *
  * 1. 非同期処理への対応
  *    - Radix UIベースのコンポーネントはアニメーションを含む
  *    - waitForを使用して状態変更を待つ
- * 
+ *
  * 2. data-slot属性の活用
  *    - Shadcn UIのコンポーネントは内部でdata-slot属性を使用
  *    - 必要に応じてこれらの属性でクエリすることも可能
- * 
+ *
  * 3. アクセシビリティ
  *    - AlertDialogは適切なARIA属性を持つ
  *    - role="button"などでクエリ可能
- * 
+ *
  * 4. 状態管理のテスト
  *    - open/onOpenChangeパターンでの制御
  *    - 親コンポーネントでの状態管理を想定
- * 
+ *
  * 5. イベントハンドラーのモック
  *    - vi.fn()で全てのコールバックをモック化
  *    - 呼び出し回数と引数を検証
@@ -143,7 +145,7 @@ describe('ConfirmDialog', () => {
 
 /**
  * 追加で考慮すべきテストケース：
- * 
+ *
  * - openがfalseの時にダイアログが表示されないこと
  * - ESCキーでダイアログが閉じること
  * - オーバーレイクリックでダイアログが閉じること

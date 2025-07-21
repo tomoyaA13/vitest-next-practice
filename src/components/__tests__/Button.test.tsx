@@ -29,11 +29,13 @@ import { Button } from '../Button';
  * 3. 無効化状態の動作
  * 4. スタイルバリエーション
  */
+
 describe('Button', () => {
   /**
    * テスト1: 基本的なレンダリングの確認
    * コンポーネントが正しくDOMに描画されることを検証
    */
+
   it('レンダリングされること', () => {
     // ========== Arrange（準備）==========
     // Buttonコンポーネントをchildren付きでレンダリング
@@ -51,19 +53,20 @@ describe('Button', () => {
    * テスト2: クリックイベントの動作確認
    * ボタンがクリックされた時に、onClickハンドラーが正しく呼ばれることを検証
    */
+
   it('クリックイベントが発火すること', () => {
     // ========== Arrange（準備）==========
     // vi.fn(): Vitestのモック関数を作成
     // モック関数は、呼び出し回数や引数を記録し、後で検証できる
     const handleClick = vi.fn();
-    
+
     // onClickプロパティにモック関数を渡してレンダリング
     render(<Button onClick={handleClick}>Click me</Button>);
 
     // ========== Act（実行）==========
     // ボタン要素を取得
     const button = screen.getByRole('button');
-    
+
     // fireEvent.click(): クリックイベントをシミュレート
     // 実際のユーザーのクリック操作を模倣
     fireEvent.click(button);
@@ -78,10 +81,11 @@ describe('Button', () => {
    * テスト3: 無効化状態の動作確認
    * disabledプロパティが設定されている時の動作を検証
    */
+
   it('disabledの時はクリックできないこと', () => {
     // ========== Arrange（準備）==========
     const handleClick = vi.fn();
-    
+
     // disabled属性を設定してレンダリング
     render(
       <Button onClick={handleClick} disabled>
@@ -91,6 +95,7 @@ describe('Button', () => {
 
     // ========== Act（実行）==========
     const button = screen.getByRole('button');
+
     // 無効化されたボタンをクリック
     fireEvent.click(button);
 
@@ -98,7 +103,7 @@ describe('Button', () => {
     // not.toHaveBeenCalled(): モック関数が一度も呼ばれていないことを確認
     // 無効化されたボタンはクリックイベントを発火しないことを検証
     expect(handleClick).not.toHaveBeenCalled();
-    
+
     // toBeDisabled(): 要素がdisabled属性を持つことを確認
     // DOMレベルでボタンが無効化されていることを検証
     expect(button).toBeDisabled();
@@ -132,23 +137,23 @@ describe('Button', () => {
 
 /**
  * このテストファイルのベストプラクティス：
- * 
+ *
  * 1. AAA パターンの使用
  *    - Arrange（準備）: テストデータとコンポーネントを準備
  *    - Act（実行）: ユーザーアクションを実行
  *    - Assert（検証）: 期待される結果を確認
- * 
+ *
  * 2. セマンティックなクエリの使用
  *    - getByRole を優先的に使用（アクセシビリティ向上）
  *    - テキストやラベルでの検索も可能
- * 
+ *
  * 3. モック関数の活用
  *    - vi.fn() でイベントハンドラーをモック化
  *    - 呼び出し回数や引数を検証可能
- * 
+ *
  * 4. 再レンダリングのテスト
  *    - rerender関数で効率的にpropsの変更をテスト
- * 
+ *
  * 5. アクセシビリティを考慮
  *    - role属性やaria属性を活用したテスト
  *    - disabled状態の適切な処理を確認
