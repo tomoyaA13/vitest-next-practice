@@ -6,8 +6,10 @@
 
 // ========== インポート ==========
 // beforeEach: 各テストの前に実行される処理を定義
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterEach, afterAll } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
 import { UserList } from '../UserList';
 
 /**
@@ -171,4 +173,276 @@ describe('UserList', () => {
  * - 仮想スクロール（実装されている場合）
  * - メモリリークの防止（クリーンアップ処理）
  * - 不要な再レンダリングの防止
+ */
+
+/**
+ * ====================================
+ * MSW（Mock Service Worker）を使用したテスト例
+ * ====================================
+ * 
+ * MSWは、ネットワークレベルでHTTPリクエストをインターセプトし、
+ * より現実的なAPIモックを提供するライブラリです。
+ * 
+ * メリット：
+ * - 実際のHTTPリクエスト/レスポンスの構造を保持
+ * - リクエストの詳細（ヘッダー、メソッド、ボディ）を検証可能
+ * - 開発環境でも同じモックを使用可能
+ * - RESTful APIの仕様に沿ったテストが書ける
+ */
+
+// MSW用のモックデータ
+const mswMockUsers = [
+  { id: 3, name: '佐藤次郎', email: 'sato@example.com' },
+  { id: 4, name: '田中美咲', email: 'tanaka@example.com' },
+  { id: 5, name: '高橋健一', email: 'takahashi@example.com' },
+];
+
+// MSWのモックサーバーを設定
+const server = setupServer(
+  // デフォルトのハンドラー：成功レスポンス
+  http.get('/api/users', () => {
+    return HttpResponse.json(mswMockUsers);
+  })
+);
+
+/**
+ * MSWを使用したUserListコンポーネントのテストスイート
+ * 
+ * 注意: MSWとvi.fn()によるモックは同時に使用できないため、
+ * 別のdescribeブロックで分離しています。
+ */
+describe('UserList - MSW版', () => {
+  // テスト全体の前後処理
+  beforeAll(() => {
+    // MSWサーバーを起動
+    server.listen({ 
+      onUnhandledRequest: 'error' // 未定義のリクエストはエラーとして扱う
+    });
+  });
+  
+  afterEach(() => {
+    // 各テスト後にハンドラーをリセット
+    server.resetHandlers();
+  });
+  
+  afterAll(() => {
+    // 全テスト終了後にサーバーを停止
+    server.close();
+  });
+
+  /**
+   * テスト1: MSWを使用した正常なデータ取得
+   */
+  it('MSWでモックしたユーザー一覧が表示されること', async () => {
+    const { container } = render(<UserList />);
+
+    // ローディング状態の確認
+    const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
+    expect(skeletons.length).toBe(3);
+
+    // データ取得後の表示確認
+    await waitFor(() => {
+      expect(screen.getByText('佐藤次郎')).toBeInTheDocument();
+      expect(screen.getByText('sato@example.com')).toBeInTheDocument();
+      expect(screen.getByText('田中美咲')).toBeInTheDocument();
+      expect(screen.getByText('tanaka@example.com')).toBeInTheDocument();
+      expect(screen.getByText('高橋健一')).toBeInTheDocument();
+      expect(screen.getByText('takahashi@example.com')).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * テスト2: ネットワークエラーのシミュレーション
+   */
+  it('MSWでネットワークエラーが発生した場合', async () => {
+    // このテストのみネットワークエラーを返すように設定
+    server.use(
+      http.get('/api/users', () => {
+        // ネットワークエラーをシミュレート
+        return HttpResponse.error();
+      })
+    );
+
+    render(<UserList />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/エラー:/)).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * テスト3: HTTPステータスエラー（500）のシミュレーション
+   */
+  it('MSWで500エラーが返された場合', async () => {
+    server.use(
+      http.get('/api/users', () => {
+        return new HttpResponse(null, { 
+          status: 500,
+          statusText: 'Internal Server Error' 
+        });
+      })
+    );
+
+    render(<UserList />);
+
+    await waitFor(() => {
+      expect(screen.getByText('エラー: Failed to fetch users')).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * テスト4: 404エラーのシミュレーション
+   */
+  it('MSWで404エラーが返された場合', async () => {
+    server.use(
+      http.get('/api/users', () => {
+        return new HttpResponse(null, { 
+          status: 404,
+          statusText: 'Not Found' 
+        });
+      })
+    );
+
+    render(<UserList />);
+
+    await waitFor(() => {
+      expect(screen.getByText('エラー: Failed to fetch users')).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * テスト5: レスポンス遅延のシミュレーション
+   */
+  it('MSWでレスポンス遅延をシミュレート', async () => {
+    server.use(
+      http.get('/api/users', async () => {
+        // 1秒の遅延をシミュレート
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return HttpResponse.json(mswMockUsers);
+      })
+    );
+
+    const { container } = render(<UserList />);
+
+    // 遅延中はローディング状態が続くことを確認
+    const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
+    expect(skeletons.length).toBe(3);
+
+    // データが最終的に表示されることを確認
+    await waitFor(() => {
+      expect(screen.getByText('佐藤次郎')).toBeInTheDocument();
+    }, { timeout: 2000 }); // タイムアウトを延長
+  });
+
+  /**
+   * テスト6: 空のレスポンスの処理
+   */
+  it('MSWで空の配列が返された場合', async () => {
+    server.use(
+      http.get('/api/users', () => {
+        return HttpResponse.json([]);
+      })
+    );
+
+    const { container } = render(<UserList />);
+
+    await waitFor(() => {
+      // ローディングが終了していることを確認
+      const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
+      expect(skeletons.length).toBe(0);
+      
+      // カードが表示されていないことを確認
+      const cards = container.querySelectorAll('[class*="card"]');
+      expect(cards.length).toBe(0);
+    });
+  });
+
+  /**
+   * テスト7: リクエストの詳細を検証
+   */
+  it('MSWでリクエストの詳細を検証', async () => {
+    let capturedRequest: Request | null = null;
+
+    server.use(
+      http.get('/api/users', ({ request }) => {
+        // リクエストオブジェクトをキャプチャ
+        capturedRequest = request;
+        return HttpResponse.json(mswMockUsers);
+      })
+    );
+
+    render(<UserList />);
+
+    await waitFor(() => {
+      expect(screen.getByText('佐藤次郎')).toBeInTheDocument();
+    });
+
+    // リクエストの詳細を検証
+    expect(capturedRequest).not.toBeNull();
+    if (capturedRequest) {
+      expect(capturedRequest.method).toBe('GET');
+      expect(capturedRequest.url).toContain('/api/users');
+      
+      // 必要に応じてヘッダーも検証可能
+      // expect(capturedRequest.headers.get('Accept')).toBe('application/json');
+    }
+  });
+
+  /**
+   * テスト8: 条件付きレスポンス
+   */
+  it('MSWで条件に応じて異なるレスポンスを返す', async () => {
+    let requestCount = 0;
+
+    server.use(
+      http.get('/api/users', () => {
+        requestCount++;
+        
+        // 最初のリクエストはエラー、リトライは成功
+        if (requestCount === 1) {
+          return new HttpResponse(null, { status: 503 });
+        }
+        
+        return HttpResponse.json(mswMockUsers);
+      })
+    );
+
+    // 実際のアプリケーションでリトライ機能が実装されている場合のテスト例
+    // 現在のUserListコンポーネントはリトライ機能がないため、
+    // このテストは最初のエラーで止まります
+    render(<UserList />);
+
+    await waitFor(() => {
+      expect(screen.getByText('エラー: Failed to fetch users')).toBeInTheDocument();
+    });
+    
+    // リクエストが1回だけ実行されたことを確認
+    expect(requestCount).toBe(1);
+  });
+});
+
+/**
+ * MSWを使用する際の注意点：
+ * 
+ * 1. セットアップ
+ *    - server.listen()でサーバーを起動
+ *    - server.resetHandlers()で各テスト後にリセット
+ *    - server.close()でサーバーを停止
+ * 
+ * 2. ハンドラーの上書き
+ *    - server.use()で特定のテスト用にハンドラーを上書き
+ *    - 上書きは該当テストのみ有効
+ * 
+ * 3. 非同期処理
+ *    - レスポンス遅延のシミュレーションが可能
+ *    - リアルなネットワーク状況を再現
+ * 
+ * 4. リクエストの検証
+ *    - リクエストオブジェクトにアクセス可能
+ *    - ヘッダー、メソッド、ボディの検証が可能
+ * 
+ * 5. エラーハンドリング
+ *    - HTTPステータスエラー
+ *    - ネットワークエラー
+ *    - タイムアウトなど
  */
