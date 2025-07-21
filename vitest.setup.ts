@@ -16,7 +16,7 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 
 // Vitestのフック関数とモックユーティリティ
-import { afterEach, vi } from 'vitest';
+import { afterEach, vi, beforeAll, afterAll } from 'vitest';
 
 /**
  * 各テスト後のクリーンアップ処理
@@ -149,3 +149,30 @@ vi.mock('next/navigation', () => ({
  * - カスタムレンダラーの定義
  * - テストユーティリティの追加
  */
+
+// ========== MSW（Mock Service Worker）のセットアップ ==========
+/**
+ * MSWサーバーのグローバル設定
+ * 全てのテストで共通のモックサーバーを使用
+ */
+import { server } from './src/mocks/server';
+
+// MSWサーバーの起動（全テスト開始前）
+beforeAll(() => {
+  server.listen({
+    // 定義されていないリクエストはエラーとして扱う
+    // これにより、モックし忘れたAPIコールを検出できる
+    onUnhandledRequest: 'error',
+  });
+});
+
+// 各テスト後にハンドラーをリセット
+// これにより、テスト間でのハンドラーの干渉を防ぐ
+afterEach(() => {
+  server.resetHandlers();
+});
+
+// 全テスト終了後にサーバーを停止
+afterAll(() => {
+  server.close();
+});

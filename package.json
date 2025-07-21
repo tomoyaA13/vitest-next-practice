@@ -9,7 +9,9 @@
     "lint": "next lint",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "msw:init": "msw init public/ --save",
+    "msw:dev": "MSW_MODE=development next dev --turbopack"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
