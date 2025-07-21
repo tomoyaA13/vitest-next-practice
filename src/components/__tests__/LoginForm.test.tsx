@@ -144,9 +144,18 @@ describe('LoginForm', () => {
     expect(handleSubmit).not.toHaveBeenCalled();
 
     // メールアドレスのエラーメッセージが表示されることを確認
+    // findByText: 非同期クエリ - 要素が表示されるまで待機する
+    // - デフォルトで1000ms（1秒）まで待機
+    // - 要素が見つかるまで50msごとに再試行
+    // - 要素が見つからない場合はエラーをthrow
+    // - 非同期処理（バリデーション等）の後に表示される要素に使用
     expect(await screen.findByText('有効なメールアドレスを入力してください')).toBeInTheDocument();
 
     // パスワードのエラーは表示されないことを確認
+    // queryByText: 同期クエリ - 即座に結果を返す
+    // - 要素が見つからない場合はnullを返す（エラーをthrowしない）
+    // - 「要素が存在しないこと」を確認する場合に使用
+    // - .not.toBeInTheDocument()と組み合わせて使用
     expect(screen.queryByText('パスワードは8文字以上である必要があります')).not.toBeInTheDocument();
   });
 
@@ -164,7 +173,8 @@ describe('LoginForm', () => {
     expect(screen.getByRole('button', { name: 'ログイン' })).toBeInTheDocument();
 
     // 初期状態ではエラーメッセージがないことを確認
-    // queryByTextは要素が見つからない場合nullを返す
+    // queryByTextの典型的な使用例：要素が存在しないことを確認
+    // getByTextを使うと、要素がない場合にエラーでテストが失敗してしまう
     expect(screen.queryByText('有効なメールアドレスを入力してください')).not.toBeInTheDocument();
     expect(screen.queryByText('パスワードは8文字以上である必要があります')).not.toBeInTheDocument();
   });
@@ -260,6 +270,56 @@ describe('LoginForm', () => {
     // 「オブジェクトが渡されたこと」だけを検証するのが一般的
   });
 });
+
+/**
+ * Testing Libraryのクエリメソッドの使い分け：
+ *
+ * 1. getBy... - 同期クエリ
+ *    - 要素が見つからない場合はエラーをthrow
+ *    - 「要素が必ず存在すること」を確認する場合に使用
+ *    - 例: getByText, getByLabelText, getByRole
+ *
+ * 2. queryBy... - 同期クエリ
+ *    - 要素が見つからない場合はnullを返す
+ *    - 「要素が存在しないこと」を確認する場合に使用
+ *    - 例: queryByText, queryByLabelText, queryByRole
+ *
+ * 3. findBy... - 非同期クエリ
+ *    - 要素が表示されるまで待機するPromiseを返す
+ *    - 非同期処理後に表示される要素に使用
+ *    - 例: findByText, findByLabelText, findByRole
+ *
+ * 使い分けのガイドライン：
+ * - 要素が既に存在する→ getBy...
+ * - 要素が存在しないことを確認→ queryBy...
+ * - 要素が後から表示される→ findBy...
+ *
+ * 使用例：
+ * // 正しい使い方
+ * const button = screen.getByRole('button'); // ボタンは最初から存在
+ * expect(screen.queryByText('エラー')).not.toBeInTheDocument(); // エラーがないことを確認
+ * expect(await screen.findByText('成功')).toBeInTheDocument(); // 非同期処理後の表示
+ *
+ * // 間違った使い方
+ * screen.getByText('エラー'); // エラーがない場合、テストが失敗
+ * await screen.findByRole('button'); // 既に存在する要素にfindByは不要
+ *
+ * 実際の動作の違い：
+ * // findByText - 非同期で待機
+ * await user.click(submitButton);
+ * // バリデーションが完了してエラーが表示されるまで待つ
+ * const error = await screen.findByText('エラーメッセージ');
+ * 
+ * // queryByText - 即座にチェック
+ * await user.click(submitButton);
+ * // この時点ではまだエラーが表示されていない可能性がある
+ * const error = screen.queryByText('エラーメッセージ'); // nullが返る
+ *
+ * 補足：複数要素の検索
+ * - getAllBy... : 複数の要素を取得（要素がないとエラー）
+ * - queryAllBy... : 複数の要素を取得（要素がないと空配列）
+ * - findAllBy... : 非同期で複数の要素を取得
+ */
 
 /**
  * React Hook Form + Zodを使用したフォームテストのポイント：
