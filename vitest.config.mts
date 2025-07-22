@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 /**
  * @file vitest.config.mts
  * @description Vitestの設定ファイル
@@ -21,6 +22,12 @@ import path from 'path';
  * Vitestの設定をエクスポート
  * defineConfigを使用することで、TypeScriptの型サポートを受けられる
  */
+import { fileURLToPath } from 'node:url';
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
+const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+
+// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
+
 export default defineConfig({
   /**
    * Viteプラグインの設定
@@ -30,12 +37,10 @@ export default defineConfig({
     // tsconfig.jsonのパスマッピングを解決
     // これにより、'@/components/Button' のようなインポートが可能になる
     tsconfigPaths(),
-    
     // Reactの変換処理を有効化
     // JSX構文の変換とReact特有の最適化を行う
     react(),
   ],
-  
   /**
    * テスト固有の設定
    */
@@ -46,21 +51,18 @@ export default defineConfig({
      * その他のオプション: 'node', 'happy-dom', 'edge-runtime'
      */
     environment: 'jsdom',
-    
     /**
      * グローバル変数の設定
      * true: describe, it, expect などをimportなしで使用可能
      * false: 明示的なimportが必要（推奨）
      */
     globals: true,
-    
     /**
      * セットアップファイルの指定
      * 各テストファイルの実行前に読み込まれる
      * モックの設定やカスタムマッチャーの追加などを行う
      */
     setupFiles: ['./vitest.setup.ts'],
-    
     /**
      * テストファイルのパターン
      * どのファイルをテストとして認識するかを定義
@@ -69,7 +71,6 @@ export default defineConfig({
      * - 対応する拡張子: js, mjs, cjs, ts, mts, cts, jsx, tsx
      */
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    
     /**
      * カバレッジ設定
      * コードカバレッジの計測と出力形式を定義
@@ -82,18 +83,43 @@ export default defineConfig({
        * - html: HTMLレポートを生成
        */
       reporter: ['text', 'json', 'html'],
-      
       /**
        * カバレッジから除外するパターン
        * テスト対象外のファイルを指定
        */
       exclude: [
-        'node_modules/',      // 外部ライブラリ
-        'vitest.setup.ts',   // セットアップファイル自体
+        'node_modules/',
+        // 外部ライブラリ
+        'vitest.setup.ts', // セットアップファイル自体
       ],
     },
+    projects: [
+      {
+        extends: true,
+        plugins: [
+          // The plugin will run tests for the stories defined in your Storybook config
+          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+          storybookTest({
+            configDir: path.join(dirname, '.storybook'),
+          }),
+        ],
+        test: {
+          name: 'storybook',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: 'playwright',
+            instances: [
+              {
+                browser: 'chromium',
+              },
+            ],
+          },
+          setupFiles: ['.storybook/vitest.setup.ts'],
+        },
+      },
+    ],
   },
-  
   /**
    * モジュール解決の設定
    * インポートパスの解決方法を定義
@@ -113,23 +139,23 @@ export default defineConfig({
 
 /**
  * 設定のポイント：
- * 
+ *
  * 1. プラグインの順序
  *    - tsconfigPaths() を react() より先に配置
  *    - パス解決を先に行ってからReact変換を実行
- * 
+ *
  * 2. テスト環境
  *    - jsdom: Reactコンポーネントのテストに必須
  *    - Node.js環境では window や document が存在しないため
- * 
+ *
  * 3. グローバル設定
  *    - globals: true でテストコードがシンプルに
  *    - ただし、明示的なimportの方が推奨される場合もある
- * 
+ *
  * 4. カバレッジ設定
  *    - 複数の形式で出力することで、CI/CDでも開発時でも確認可能
  *    - HTMLレポートは視覚的にカバレッジを確認できる
- * 
+ *
  * 5. パスエイリアス
  *    - srcディレクトリからの絶対パスインポートを可能に
  *    - リファクタリング時のパス変更を最小限に
@@ -137,7 +163,7 @@ export default defineConfig({
 
 /**
  * 追加で検討すべき設定オプション：
- * 
+ *
  * - testTimeout: テストのタイムアウト時間を設定（デフォルト: 5000ms）
  * - maxConcurrency: 並列実行するテストファイルの最大数
  * - watchExclude: ウォッチモードで監視から除外するパターン
@@ -146,6 +172,6 @@ export default defineConfig({
  * - clearMocks: 各テスト後にモックを自動的にクリア
  * - mockReset: 各テスト後にモックの実装をリセット
  * - restoreMocks: 各テスト後にモックを元の実装に戻す
- * 
+ *
  * これらのオプションは必要に応じて test オブジェクト内に追加できます。
  */
