@@ -2,36 +2,24 @@
 
 /**
  * 非同期処理を含むコンポーネントのStorybookファイル
- * 
+ *
  * このファイルでは、APIからデータを取得するコンポーネントのストーリーを
  * MSW（Mock Service Worker）を使って作成する方法を説明します。
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { UserList } from '../UserList';
-import { http, HttpResponse, delay } from 'msw';
+import { UserList } from '@/components/UserList';
+import { http, HttpResponse, delay } from 'msw'; // ストーリー固有のハンドラー作成用
+// 既存のMSWハンドラーをインポート
+import { handlers as defaultHandlers, errorHandlers, specialHandlers, mockUsers, mswMockUsers } from '../../mocks/handlers';
 
 // msw-storybook-addonがインストールされていない場合の警告
 // この部分は、msw-storybook-addonをインストール後に削除してください
 if (typeof window !== 'undefined' && !window.msw) {
   console.warn(
-    'MSW Storybook Addonがインストールされていません。\n' +
-    '以下のコマンドを実行してください：\n' +
-    'pnpm add -D msw-storybook-addon'
+    'MSW Storybook Addonがインストールされていません。\n' + '以下のコマンドを実行してください：\n' + 'pnpm add -D msw-storybook-addon',
   );
 }
-
-/**
- * MSWのハンドラーを定義
- * 
- * MSWを使うと、実際のAPIを呼び出すことなく、
- * ネットワークリクエストをインターセプトしてモックレスポンスを返せます。
- */
-const mockUsers = [
-  { id: 1, name: '田中太郎', email: 'tanaka@example.com' },
-  { id: 2, name: '鈴木花子', email: 'suzuki@example.com' },
-  { id: 3, name: '佐藤次郎', email: 'sato@example.com' },
-];
 
 const meta = {
   title: 'Components/UserList',
@@ -60,31 +48,26 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * 成功時のストーリー
- * 
- * MSWのハンドラーをストーリーごとに設定できます。
+ *
+ * デフォルトのハンドラーを使用して、基本的な成功レスポンスを返します。
  */
 export const Default: Story = {
   parameters: {
     docs: {
       description: {
-        story: '正常にユーザーリストを取得して表示する例',
+        story: '正常にユーザーリストを取得して表示する例（山田太郎、鈴木花子）',
       },
     },
     // msw パラメータで、このストーリー専用のモックハンドラーを定義
     msw: {
-      handlers: [
-        http.get('/api/users', () => {
-          // 成功レスポンスを返す
-          return HttpResponse.json(mockUsers);
-        }),
-      ],
+      handlers: defaultHandlers, // 既存のデフォルトハンドラーを使用
     },
   },
 };
 
 /**
  * ローディング状態のストーリー
- * 
+ *
  * delayを使って、ローディング状態を確認できるようにします。
  */
 export const Loading: Story = {
@@ -96,6 +79,8 @@ export const Loading: Story = {
     },
     msw: {
       handlers: [
+        // 注: このケースは特殊なので、インラインで定義
+        // handlers.tsに永続的なローディング用ハンドラーを追加することも可能
         http.get('/api/users', async () => {
           // 無限に遅延させることでローディング状態を維持
           await delay('infinite');
@@ -108,57 +93,43 @@ export const Loading: Story = {
 
 /**
  * 遅延を含む実際的なローディング
- * 
+ *
  * 実際のAPIのような遅延を再現
  */
 export const LoadingWithDelay: Story = {
   parameters: {
     docs: {
       description: {
-        story: '2秒の遅延後にデータを表示（実際のAPIの挙動を再現）',
+        story: '1秒の遅延後にデータを表示（実際のAPIの挙動を再現）',
       },
     },
     msw: {
-      handlers: [
-        http.get('/api/users', async () => {
-          // 2秒の遅延
-          await delay(2000);
-          return HttpResponse.json(mockUsers);
-        }),
-      ],
+      handlers: [specialHandlers.delayedResponse], // 既存の遅延ハンドラーを使用
     },
   },
 };
 
 /**
  * エラー状態のストーリー
- * 
+ *
  * APIがエラーを返す場合の表示を確認
  */
 export const Error: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'APIエラー時のエラーメッセージ表示',
+        story: 'APIエラー時のエラーメッセージ表示（500エラー）',
       },
     },
     msw: {
-      handlers: [
-        http.get('/api/users', () => {
-          // 500エラーを返す
-          return HttpResponse.json(
-            { error: 'Internal Server Error' },
-            { status: 500 }
-          );
-        }),
-      ],
+      handlers: [errorHandlers.serverError], // 既存のサーバーエラーハンドラーを使用
     },
   },
 };
 
 /**
  * ネットワークエラーのストーリー
- * 
+ *
  * ネットワーク自体に問題がある場合
  */
 export const NetworkError: Story = {
@@ -169,19 +140,14 @@ export const NetworkError: Story = {
       },
     },
     msw: {
-      handlers: [
-        http.get('/api/users', () => {
-          // ネットワークエラーをシミュレート
-          return HttpResponse.error();
-        }),
-      ],
+      handlers: [errorHandlers.networkError], // 既存のネットワークエラーハンドラーを使用
     },
   },
 };
 
 /**
  * 空のリストのストーリー
- * 
+ *
  * ユーザーが0人の場合の表示
  */
 export const EmptyList: Story = {
@@ -192,18 +158,14 @@ export const EmptyList: Story = {
       },
     },
     msw: {
-      handlers: [
-        http.get('/api/users', () => {
-          return HttpResponse.json([]);
-        }),
-      ],
+      handlers: [specialHandlers.emptyResponse], // 既存の空レスポンスハンドラーを使用
     },
   },
 };
 
 /**
  * 大量データのストーリー
- * 
+ *
  * パフォーマンステストや表示確認用
  */
 export const ManyUsers: Story = {
@@ -231,7 +193,7 @@ export const ManyUsers: Story = {
 
 /**
  * レスポンシブ確認用のストーリー
- * 
+ *
  * 異なる画面サイズでの表示を確認
  */
 export const Responsive: Story = {
@@ -242,11 +204,7 @@ export const Responsive: Story = {
       },
     },
     msw: {
-      handlers: [
-        http.get('/api/users', () => {
-          return HttpResponse.json(mockUsers);
-        }),
-      ],
+      handlers: defaultHandlers, // 既存のデフォルトハンドラーを使用
     },
     // Storybookのビューポート設定
     viewport: {
@@ -280,7 +238,7 @@ export const Responsive: Story = {
 
 /**
  * Play関数を使った操作シナリオ
- * 
+ *
  * ユーザーの操作フローをテスト
  */
 export const InteractionTest: Story = {
@@ -291,45 +249,36 @@ export const InteractionTest: Story = {
       },
     },
     msw: {
-      handlers: [
-        http.get('/api/users', async () => {
-          // 1秒の遅延後にデータを返す
-          await delay(1000);
-          return HttpResponse.json(mockUsers);
-        }),
-      ],
+      handlers: [specialHandlers.delayedResponse], // 既存の遅延ハンドラーを使用（1秒遅延）
     },
   },
   play: async ({ canvasElement, step }) => {
     const { waitFor, within, expect } = await import('@storybook/test');
-    
+
     const canvas = within(canvasElement);
-    
+
     await step('ローディング状態を確認', async () => {
       // Skeletonが表示されていることを確認
       const skeletons = canvas.getAllByTestId(/skeleton/i);
       expect(skeletons.length).toBeGreaterThan(0);
     });
-    
+
     await step('ユーザーリストが表示されるのを待つ', async () => {
-      // ユーザー名が表示されるまで待機
-      await waitFor(
-        () => expect(canvas.getByText('田中太郎')).toBeInTheDocument(),
-        { timeout: 2000 }
-      );
+      // ユーザー名が表示されるまで待機（mswMockUsersのデータが表示される）
+      await waitFor(() => expect(canvas.getByText('佐藤次郎')).toBeInTheDocument(), { timeout: 2000 });
     });
-    
+
     await step('全ユーザーが表示されていることを確認', async () => {
-      expect(canvas.getByText('田中太郎')).toBeInTheDocument();
-      expect(canvas.getByText('鈴木花子')).toBeInTheDocument();
       expect(canvas.getByText('佐藤次郎')).toBeInTheDocument();
+      expect(canvas.getByText('田中美咲')).toBeInTheDocument();
+      expect(canvas.getByText('高橋健一')).toBeInTheDocument();
     });
   },
 };
 
 /**
  * ダークモードでの表示確認
- * 
+ *
  * テーマ切り替えに対応したコンポーネントの確認
  */
 export const DarkMode: Story = {
@@ -340,11 +289,7 @@ export const DarkMode: Story = {
       },
     },
     msw: {
-      handlers: [
-        http.get('/api/users', () => {
-          return HttpResponse.json(mockUsers);
-        }),
-      ],
+      handlers: defaultHandlers, // 既存のデフォルトハンドラーを使用
     },
     // グローバルテーマの設定
     backgrounds: {
@@ -357,11 +302,14 @@ export const DarkMode: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="dark" style={{ 
-        backgroundColor: '#1a1a1a', 
-        padding: '20px',
-        minHeight: '400px' 
-      }}>
+      <div
+        className='dark'
+        style={{
+          backgroundColor: '#1a1a1a',
+          padding: '20px',
+          minHeight: '400px',
+        }}
+      >
         <Story />
       </div>
     ),

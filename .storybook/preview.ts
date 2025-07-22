@@ -2,8 +2,13 @@ import type { Preview } from '@storybook/nextjs-vite';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import '../src/app/globals.css'; // Tailwind CSSとグローバルスタイルを適用
 
+// デフォルトのMSWハンドラーをインポート
+import { handlers } from '../src/mocks/handlers';
+
 // MSWの初期化
-initialize();
+initialize({
+  onUnhandledRequest: 'bypass', // 未定義のリクエストはバイパス
+});
 
 const preview: Preview = {
   // MSWローダーを追加
@@ -14,6 +19,11 @@ const preview: Preview = {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
+    },
+    // グローバルMSWハンドラーを設定
+    // これにより、特別な設定がないストーリーでも基本的なハンドラーが利用可能
+    msw: {
+      handlers: handlers,
     },
 
     a11y: {
