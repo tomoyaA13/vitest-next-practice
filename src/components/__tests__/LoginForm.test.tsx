@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 // fireEventよりも推奨される方法（キーボード入力の遅延等を考慮）
 import userEvent from '@testing-library/user-event';
 
-import { LoginForm } from '../LoginForm';
+import { LoginForm } from '@/components/LoginForm';
 
 /**
  * LoginFormコンポーネントのテストスイート
@@ -65,7 +65,7 @@ describe('LoginForm', () => {
     // 最新のuserEventは非同期処理を待つため、通常はwaitForは不要
     expect(handleSubmit).toHaveBeenCalled();
     expect(handleSubmit).toHaveBeenCalledTimes(1);
-    
+
     // toHaveBeenCalledWithの詳細解説：
     // React Hook Formは、onSubmitハンドラーを呼び出す際に2つの引数を渡します：
     // 第1引数: フォームデータのオブジェクト
@@ -80,9 +80,9 @@ describe('LoginForm', () => {
       // expect.any(Object)は「任意のオブジェクト」にマッチするマッチャー
       // イベントオブジェクトの詳細な内容は重要でないため、
       // 「何らかのオブジェクトが渡されていること」だけを確認
-      expect.any(Object)
+      expect.any(Object),
     );
-    
+
     // 別の検証方法（参考）：
     // 第1引数のみを検証したい場合は、以下のようにも書ける
     // expect(handleSubmit.mock.calls[0][0]).toEqual({
@@ -248,7 +248,7 @@ describe('LoginForm', () => {
     // エラー修正後の送信も同様に、waitForは通常不要
     expect(handleSubmit).toHaveBeenCalled();
     expect(handleSubmit).toHaveBeenCalledTimes(1);
-    
+
     // toHaveBeenCalledWithの解説（再掲）：
     // このメソッドは、モック関数が特定の引数で呼び出されたことを検証
     expect(handleSubmit).toHaveBeenCalledWith(
@@ -261,9 +261,9 @@ describe('LoginForm', () => {
       // expect.any(Object)はJest/Vitestのマッチャーで、
       // 「任意のオブジェクト型の値」を許容
       // 他のマッチャー例: expect.any(String), expect.any(Number), expect.any(Function)
-      expect.any(Object)
+      expect.any(Object),
     );
-    
+
     // 補足: expect.any(Object)を使う理由
     // Reactのイベントオブジェクトは複雑で、
     // テスト毎に内容が変わる可能性があるため、
@@ -309,7 +309,7 @@ describe('LoginForm', () => {
  * await user.click(submitButton);
  * // バリデーションが完了してエラーが表示されるまで待つ
  * const error = await screen.findByText('エラーメッセージ');
- * 
+ *
  * // queryByText - 即座にチェック
  * await user.click(submitButton);
  * // この時点ではまだエラーが表示されていない可能性がある

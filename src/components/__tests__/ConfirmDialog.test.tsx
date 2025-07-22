@@ -13,7 +13,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 // テスト対象のコンポーネント
-import { ConfirmDialog } from '../ConfirmDialog';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 /**
  * ConfirmDialogコンポーネントのテストスイート
