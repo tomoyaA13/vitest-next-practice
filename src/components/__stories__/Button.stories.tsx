@@ -43,43 +43,6 @@ const meta = {
   // 'autodocs'タグを付けると自動的にドキュメントページが生成されます
   tags: ['autodocs'],
 
-  // argTypes: プロパティのコントロール設定
-  // https://storybook.js.org/docs/api/arg-types
-  // Storybookのコントロールパネルでプロパティを操作できるようになります
-  argTypes: {
-    variant: {
-      control: 'radio', // ラジオボタンでの選択
-      options: ['primary', 'secondary'],
-      description: 'ボタンの外観バリアント',
-      table: {
-        type: { summary: 'primary | secondary' },
-        defaultValue: { summary: 'primary' },
-      },
-    },
-    disabled: {
-      control: 'boolean', // チェックボックスでの切り替え
-      description: 'ボタンの無効化状態',
-      table: {
-        type: { summary: 'boolean' },
-        defaultValue: { summary: 'false' },
-      },
-    },
-    onClick: {
-      action: 'clicked', // クリックイベントをアクションパネルに記録
-      description: 'クリックイベントハンドラー',
-      table: {
-        type: { summary: '() => void' },
-      },
-    },
-    children: {
-      control: 'text', // テキスト入力での編集
-      description: 'ボタンの内容',
-      table: {
-        type: { summary: 'ReactNode' },
-      },
-    },
-  },
-
   // デフォルトのargs（プロパティ値）
   // すべてのストーリーで共通して使用されます
   args: {
