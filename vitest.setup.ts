@@ -67,7 +67,7 @@ vi.mock('next/navigation', () => ({
       back: vi.fn(),
     };
   },
-  
+
   /**
    * useSearchParamsフックのモック
    * URLのクエリパラメータを扱うためのフック
@@ -76,7 +76,7 @@ vi.mock('next/navigation', () => ({
     // 空のURLSearchParamsオブジェクトを返す
     return new URLSearchParams();
   },
-  
+
   /**
    * usePathnameフックのモック
    * 現在のパス名を取得するためのフック
@@ -115,23 +115,23 @@ vi.mock('next/navigation', () => ({
 
 /**
  * このセットアップファイルの役割：
- * 
+ *
  * 1. テスト環境の標準化
  *    - 全てのテストで共通の環境を提供
  *    - ブラウザAPIのモック化
- * 
+ *
  * 2. DOMのクリーンアップ
  *    - 各テスト後に自動的にDOMをリセット
  *    - メモリリークの防止
- * 
+ *
  * 3. カスタムマッチャーの追加
  *    - jest-domによる便利なアサーション
  *    - より読みやすいテストコード
- * 
+ *
  * 4. フレームワーク固有の設定
  *    - Next.jsのルーティング機能のモック
  *    - SSR/SSG関連の処理のスキップ
- * 
+ *
  * 5. パフォーマンスの最適化
  *    - 不要な処理のスキップ
  *    - テスト実行時間の短縮
@@ -139,7 +139,7 @@ vi.mock('next/navigation', () => ({
 
 /**
  * 追加で検討すべき設定：
- * 
+ *
  * - 環境変数の設定（process.env.NODE_ENV = 'test'）
  * - タイムゾーンの固定化
  * - 日付のモック（vi.setSystemTime）
@@ -155,7 +155,7 @@ vi.mock('next/navigation', () => ({
  * MSWサーバーのグローバル設定
  * 全てのテストで共通のモックサーバーを使用
  */
-import { server } from './src/mocks/server';
+import { server } from '@/mocks/server';
 
 // MSWサーバーの起動（全テスト開始前）
 beforeAll(() => {
