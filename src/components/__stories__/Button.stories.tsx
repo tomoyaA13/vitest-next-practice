@@ -44,6 +44,7 @@ const meta = {
   tags: ['autodocs'],
 
   // argTypes: プロパティのコントロール設定
+  // https://storybook.js.org/docs/api/arg-types
   // Storybookのコントロールパネルでプロパティを操作できるようになります
   argTypes: {
     variant: {
