@@ -113,6 +113,13 @@ export const Default: Story = {
  * - 常に同じ手順でテストできる
  * - 複雑な操作シナリオも自動化できる
  * - CI/CDパイプラインで自動実行可能
+ * 
+ * ■ react-hook-formのonSubmitについて
+ * react-hook-formのhandleSubmitは、2つの引数でonSubmitを呼び出します：
+ * 1. フォームデータ (FormData)
+ * 2. Reactのイベントオブジェクト (SyntheticBaseEvent)
+ * 
+ * そのため、テストでは第1引数のみをチェックします。
  */
 export const FilledForm: Story = {
   /**
@@ -200,7 +207,10 @@ export const FilledForm: Story = {
      */
     // 送信データの確認（Actionsパネルで確認可能）
     await waitFor(() => {
-      expect(args.onSubmit).toHaveBeenCalledWith({
+      // react-hook-formは2つの引数を渡す: (data, event)
+      // 第1引数のフォームデータのみをチェック
+      expect(args.onSubmit).toHaveBeenCalled();
+      expect(args.onSubmit.mock.calls[0][0]).toEqual({
         email: 'test@example.com',
         password: 'password123',
       });
@@ -416,7 +426,8 @@ export const SubmitWithEnter: Story = {
     
     // フォームが送信されたことを確認
     await waitFor(() => {
-      expect(args.onSubmit).toHaveBeenCalledWith({
+      expect(args.onSubmit).toHaveBeenCalled();
+      expect(args.onSubmit.mock.calls[0][0]).toEqual({
         email: 'enter@example.com',
         password: 'password123',
       });
