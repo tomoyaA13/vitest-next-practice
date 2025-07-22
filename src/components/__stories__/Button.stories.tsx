@@ -172,7 +172,7 @@ export const WithInteraction: Story = {
     onClick: () => alert('ボタンがクリックされました！'),
   },
   play: async ({ canvasElement, step }) => {
-    // @storybook/testing-libraryを使った操作テスト
+    // @storybook/test を使った操作テスト
     const { getByRole } = await import('@storybook/test');
     const { userEvent } = await import('@storybook/test');
 
