@@ -1,6 +1,13 @@
 import type { Preview } from '@storybook/nextjs-vite';
+import { initialize, mswLoader } from 'msw-storybook-addon';
+import '../src/app/globals.css'; // Tailwind CSSとグローバルスタイルを適用
+
+// MSWの初期化
+initialize();
 
 const preview: Preview = {
+  // MSWローダーを追加
+  loaders: [mswLoader],
   parameters: {
     controls: {
       matchers: {

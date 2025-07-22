@@ -11,6 +11,16 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { UserList } from '../UserList';
 import { http, HttpResponse, delay } from 'msw';
 
+// msw-storybook-addonがインストールされていない場合の警告
+// この部分は、msw-storybook-addonをインストール後に削除してください
+if (typeof window !== 'undefined' && !window.msw) {
+  console.warn(
+    'MSW Storybook Addonがインストールされていません。\n' +
+    '以下のコマンドを実行してください：\n' +
+    'pnpm add -D msw-storybook-addon'
+  );
+}
+
 /**
  * MSWのハンドラーを定義
  * 
