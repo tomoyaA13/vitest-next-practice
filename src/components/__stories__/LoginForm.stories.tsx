@@ -2,10 +2,10 @@
 
 /**
  * フォームコンポーネントのStorybookファイル
- * 
+ *
  * このファイルでは、フォームのバリデーション、ユーザー入力、
  * エラー表示などをテストする方法を説明します。
- * 
+ *
  * ■ react-hook-formとzodの連携
  * - react-hook-form: フォームの状態管理とバリデーション
  * - zod: スキーマベースのバリデーション
@@ -15,7 +15,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 /**
  * @storybook/testからインポートする関数の説明：
- * 
+ *
  * - within: 特定の要素内で要素を検索するスコープを作成
  * - userEvent: ユーザーの操作（クリック、入力など）をシミュレート
  * - expect: テストのアサーション（期待値の確認）を行う
@@ -27,7 +27,7 @@ import { LoginForm } from '../LoginForm';
 
 /**
  * ■ Metaオブジェクトの設定
- * 
+ *
  * フォームコンポーネントの特徴：
  * - ユーザー入力を受け付ける
  * - バリデーションエラーを表示する
@@ -45,10 +45,10 @@ const meta = {
     },
   },
   tags: ['autodocs'],
-  
+
   /**
    * argTypes: フォームコンポーネントのプロパティ設定
-   * 
+   *
    * onSubmitはactionとして設定することで、
    * Actionsパネルで送信データを確認できます
    */
@@ -61,7 +61,7 @@ const meta = {
       },
     },
   },
-  
+
   // デフォルトのargs
   // fn()を使ってモック関数を作成することで、
   // toHaveBeenCalledWithなどのアサーションが使用可能になります
@@ -70,7 +70,7 @@ const meta = {
       console.log('Form submitted with:', data);
     }),
   },
-  
+
   // フォームを適切なサイズのコンテナで囲む
   decorators: [
     (Story) => (
@@ -86,7 +86,7 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * Default: 初期状態
- * 
+ *
  * フォームの初期表示状態を確認します。
  * - 入力フィールドが空
  * - エラーメッセージが表示されていない
@@ -99,32 +99,32 @@ export const Default: Story = {
 
 /**
  * FilledForm: 入力済みのフォーム
- * 
+ *
  * Play関数を使って、フォームに有効な値を入力します。
  * これにより、正常な入力時の動作を確認できます。
- * 
+ *
  * ■ Play関数とは？
  * Play関数は、ストーリーが画面に表示された後に自動的に実行される関数です。
  * ユーザーの操作（クリック、入力、キーボード操作など）をプログラムで再現し、
  * コンポーネントが正しく動作することを確認できます。
- * 
+ *
  * Play関数の利点：
  * - 手動でテストする必要がない
  * - 常に同じ手順でテストできる
  * - 複雑な操作シナリオも自動化できる
  * - CI/CDパイプラインで自動実行可能
- * 
+ *
  * ■ react-hook-formのonSubmitについて
  * react-hook-formのhandleSubmitは、2つの引数でonSubmitを呼び出します：
  * 1. フォームデータ (FormData)
  * 2. Reactのイベントオブジェクト (SyntheticBaseEvent)
- * 
+ *
  * そのため、テストでは第1引数のみをチェックします。
  */
 export const FilledForm: Story = {
   /**
    * play関数の引数について：
-   * 
+   *
    * @param canvasElement - ストーリーがレンダリングされるDOM要素
    *                       これは実際のHTMLElement（div要素）です
    * @param args - このストーリーに渡されたすべてのargs
@@ -134,27 +134,27 @@ export const FilledForm: Story = {
   play: async ({ canvasElement, args }) => {
     /**
      * within関数について：
-     * 
+     *
      * within()は、Testing Libraryが提供する関数で、
      * 特定の要素内で要素を検索するためのスコープを作成します。
-     * 
+     *
      * なぜ必要？
      * - グローバルなdocument全体ではなく、このストーリーの範囲内だけで検索
      * - 他のストーリーやコンポーネントとの干渉を防ぐ
      * - より効率的で正確な要素の検索
      */
     const canvas = within(canvasElement);
-    
+
     /**
      * 要素の取得方法について：
-     * 
+     *
      * Testing Libraryは、実際のユーザーが要素を見つける方法に基づいて
      * 要素を検索することを推奨しています。
-     * 
+     *
      * getByLabelText('メールアドレス'):
      * - <label>メールアドレス</label>に関連付けられた入力要素を検索
      * - アクセシビリティの観点からも良い方法
-     * 
+     *
      * getByRole('button', { name: 'ログイン' }):
      * - role="button"を持つ要素で、テキストが「ログイン」のものを検索
      * - セマンティックHTMLに基づいた検索
@@ -162,13 +162,13 @@ export const FilledForm: Story = {
     const emailInput = canvas.getByLabelText('メールアドレス');
     const passwordInput = canvas.getByLabelText('パスワード');
     const submitButton = canvas.getByRole('button', { name: 'ログイン' });
-    
+
     /**
      * userEventについて：
-     * 
+     *
      * userEventは、実際のユーザーの操作を再現するためのユーティリティです。
      * fireEventよりも現実的な動作をシミュレートします。
-     * 
+     *
      * userEvent.type():
      * - キーボードで文字を入力する動作を再現
      * - 各文字ごとにkeydown、keypress、keyupイベントが発生
@@ -176,10 +176,10 @@ export const FilledForm: Story = {
      */
     // ステップ1: メールアドレスを入力
     await userEvent.type(emailInput, 'test@example.com');
-    
+
     // ステップ2: パスワードを入力
     await userEvent.type(passwordInput, 'password123');
-    
+
     /**
      * userEvent.click():
      * - マウスクリックを再現
@@ -188,19 +188,19 @@ export const FilledForm: Story = {
      */
     // ステップ3: フォームを送信
     await userEvent.click(submitButton);
-    
+
     /**
      * waitForとexpectについて：
-     * 
+     *
      * waitFor():
      * - 非同期処理が完了するまで待機
      * - デフォルトで1000ms（1秒）まで待機し、50msごとに条件をチェック
      * - タイムアウトすると失敗
-     * 
+     *
      * expect():
      * - Jestスタイルのアサーション（期待値の確認）
      * - テストが成功したかどうかを判定
-     * 
+     *
      * toHaveBeenCalledWith():
      * - モック関数が特定の引数で呼ばれたことを確認
      * - args.onSubmitはStorybookが自動的にモック化している
@@ -220,18 +220,18 @@ export const FilledForm: Story = {
 
 /**
  * ValidationErrors: バリデーションエラーの表示
- * 
+ *
  * 無効な値を入力して、エラーメッセージが適切に表示されることを確認します。
  * react-hook-formのmode: 'onChange'により、入力中にリアルタイムでバリデーションが実行されます。
  */
 export const ValidationErrors: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // ステップ1: 無効なメールアドレスを入力
     const emailInput = canvas.getByLabelText('メールアドレス');
     await userEvent.type(emailInput, 'invalid-email');
-    
+
     /**
      * userEvent.tab():
      * - Tabキーを押す動作を再現
@@ -240,7 +240,7 @@ export const ValidationErrors: Story = {
      */
     // タブキーで次のフィールドに移動（バリデーションをトリガー）
     await userEvent.tab();
-    
+
     /**
      * toBeInTheDocument():
      * - 要素がDOMに存在することを確認
@@ -250,14 +250,14 @@ export const ValidationErrors: Story = {
     await waitFor(() => {
       expect(canvas.getByText('有効なメールアドレスを入力してください')).toBeInTheDocument();
     });
-    
+
     // ステップ2: 短すぎるパスワードを入力
     const passwordInput = canvas.getByLabelText('パスワード');
     await userEvent.type(passwordInput, 'short');
-    
+
     // タブキーで移動
     await userEvent.tab();
-    
+
     // パスワードのエラーメッセージが表示されることを確認
     await waitFor(() => {
       expect(canvas.getByText('パスワードは8文字以上である必要があります')).toBeInTheDocument();
@@ -267,22 +267,22 @@ export const ValidationErrors: Story = {
 
 /**
  * PartiallyFilled: 部分的に入力されたフォーム
- * 
+ *
  * 一部のフィールドのみ入力した状態を表示します。
  * フォームの送信ボタンをクリックすると、未入力フィールドのエラーが表示されます。
  */
 export const PartiallyFilled: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // メールアドレスのみ入力
     const emailInput = canvas.getByLabelText('メールアドレス');
     await userEvent.type(emailInput, 'user@example.com');
-    
+
     // フォームを送信しようとする
     const submitButton = canvas.getByRole('button', { name: 'ログイン' });
     await userEvent.click(submitButton);
-    
+
     // パスワードフィールドのエラーメッセージが表示されることを確認
     await waitFor(() => {
       expect(canvas.getByText('パスワードは8文字以上である必要があります')).toBeInTheDocument();
@@ -292,24 +292,24 @@ export const PartiallyFilled: Story = {
 
 /**
  * CorrectingErrors: エラーの修正
- * 
+ *
  * エラーが表示された後、正しい値に修正する過程を表示します。
  * リアルタイムバリデーションにより、エラーが即座に消えることを確認できます。
  */
 export const CorrectingErrors: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // ステップ1: 無効な値を入力
     const emailInput = canvas.getByLabelText('メールアドレス');
     await userEvent.type(emailInput, 'invalid');
     await userEvent.tab();
-    
+
     // エラーが表示されることを確認
     await waitFor(() => {
       expect(canvas.getByText('有効なメールアドレスを入力してください')).toBeInTheDocument();
     });
-    
+
     /**
      * userEvent.clear():
      * - 入力フィールドの内容をクリア
@@ -318,7 +318,7 @@ export const CorrectingErrors: Story = {
     // ステップ2: フィールドをクリアして正しい値を入力
     await userEvent.clear(emailInput);
     await userEvent.type(emailInput, 'correct@example.com');
-    
+
     /**
      * queryByText vs getByText:
      * - getByText: 要素が見つからない場合はエラーを投げる
@@ -334,17 +334,17 @@ export const CorrectingErrors: Story = {
 
 /**
  * SlowTyping: ゆっくりとした入力
- * 
+ *
  * 実際のユーザーの入力速度をシミュレートします。
  * delay オプションを使用して、より現実的な入力を再現します。
  */
 export const SlowTyping: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     const emailInput = canvas.getByLabelText('メールアドレス');
     const passwordInput = canvas.getByLabelText('パスワード');
-    
+
     /**
      * userEvent.typeのdelayオプション:
      * - 各文字の入力間に遅延を追加
@@ -355,7 +355,7 @@ export const SlowTyping: Story = {
     await userEvent.type(emailInput, 'slow.typing@example.com', {
       delay: 100,
     });
-    
+
     // ゆっくりとパスワードを入力
     await userEvent.type(passwordInput, 'mypassword123', {
       delay: 100,
@@ -365,21 +365,21 @@ export const SlowTyping: Story = {
 
 /**
  * KeyboardNavigation: キーボードナビゲーション
- * 
+ *
  * タブキーを使ったフォーム内の移動を確認します。
  * アクセシビリティの観点から重要なテストです。
  */
 export const KeyboardNavigation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // 最初のフィールドにフォーカス
     const emailInput = canvas.getByLabelText('メールアドレス');
     await userEvent.click(emailInput);
-    
+
     // タブキーで次のフィールドに移動
     await userEvent.tab();
-    
+
     /**
      * toHaveFocus():
      * - 要素がフォーカスを持っていることを確認
@@ -388,10 +388,10 @@ export const KeyboardNavigation: Story = {
     // パスワードフィールドにフォーカスが移動したことを確認
     const passwordInput = canvas.getByLabelText('パスワード');
     expect(passwordInput).toHaveFocus();
-    
+
     // もう一度タブキーで送信ボタンに移動
     await userEvent.tab();
-    
+
     // 送信ボタンにフォーカスが移動したことを確認
     const submitButton = canvas.getByRole('button', { name: 'ログイン' });
     expect(submitButton).toHaveFocus();
@@ -400,21 +400,21 @@ export const KeyboardNavigation: Story = {
 
 /**
  * SubmitWithEnter: Enterキーでの送信
- * 
+ *
  * フォーム内でEnterキーを押すことで送信できることを確認します。
  * 一般的なUXパターンのテストです。
  */
 export const SubmitWithEnter: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    
+
     // フォームに値を入力
     const emailInput = canvas.getByLabelText('メールアドレス');
     const passwordInput = canvas.getByLabelText('パスワード');
-    
+
     await userEvent.type(emailInput, 'enter@example.com');
     await userEvent.type(passwordInput, 'password123');
-    
+
     /**
      * userEvent.keyboard():
      * - キーボードショートカットや特殊キーの入力を再現
@@ -423,7 +423,7 @@ export const SubmitWithEnter: Story = {
      */
     // パスワードフィールドでEnterキーを押す
     await userEvent.keyboard('{Enter}');
-    
+
     // フォームが送信されたことを確認
     await waitFor(() => {
       expect(args.onSubmit).toHaveBeenCalled();
@@ -437,17 +437,17 @@ export const SubmitWithEnter: Story = {
 
 /**
  * CopyPasteScenario: コピー＆ペーストのシナリオ
- * 
+ *
  * クリップボードからの貼り付けをシミュレートします。
  * パスワードマネージャーを使用するユーザーの動作を再現します。
  */
 export const CopyPasteScenario: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     const emailInput = canvas.getByLabelText('メールアドレス');
     const passwordInput = canvas.getByLabelText('パスワード');
-    
+
     /**
      * userEvent.paste():
      * - クリップボードからの貼り付けを再現
@@ -457,11 +457,11 @@ export const CopyPasteScenario: Story = {
     // メールアドレスを貼り付け（paste イベントをシミュレート）
     await userEvent.click(emailInput);
     await userEvent.paste('pasted.email@example.com');
-    
+
     // パスワードを貼り付け
     await userEvent.click(passwordInput);
     await userEvent.paste('PastedPassword123!');
-    
+
     /**
      * toHaveValue():
      * - 入力フィールドの値を確認
@@ -475,7 +475,7 @@ export const CopyPasteScenario: Story = {
 
 /**
  * MobileView: モバイルビュー
- * 
+ *
  * モバイル画面でのフォーム表示を確認します。
  * レスポンシブデザインのテストです。
  */
@@ -496,30 +496,61 @@ export const MobileView: Story = {
 
 /**
  * ■ Play関数のデバッグ方法
- * 
+ *
  * 1. Storybookの「Interactions」タブを確認
  *    - 各ステップの実行状況が表示される
  *    - エラーが発生した場所が特定できる
- * 
+ *
  * 2. ブラウザの開発者ツールを使用
  *    - console.logで中間状態を確認
  *    - ブレークポイントを設定してデバッグ
- * 
+ *
  * 3. 一時的にwaitForのタイムアウトを延長
  *    await waitFor(() => {...}, { timeout: 5000 });
- * 
+ *
  * ■ よくある問題と解決方法
- * 
+ *
  * 1. 要素が見つからない
  *    - ラベルテキストが正確か確認
  *    - 要素がレンダリングされているか確認
  *    - 適切なクエリメソッドを使用しているか確認
- * 
+ *
  * 2. タイミングの問題
  *    - waitForを使って非同期処理を待つ
  *    - userEvent.typeのdelayを調整
- * 
+ *
  * 3. フォーカスの問題
  *    - 要素をクリックしてからタイプ
  *    - tabインデックスが正しく設定されているか確認
+ *
+ * 4. onSubmitのアサーションエラー
+ *    - react-hook-formは2つの引数を渡す: (data, event)
+ *    - 第1引数のみをチェック: expect(args.onSubmit.mock.calls[0][0]).toEqual({...})
+ *    - または両方の引数をチェック: expect(args.onSubmit).toHaveBeenCalledWith(data, expect.anything())
+ *
+ * ■ react-hook-formのテストのベストプラクティス
+ *
+ * 1. フォームデータの検証
+ *    ```typescript
+ *    // 第1引数（フォームデータ）のみをチェック
+ *    expect(args.onSubmit).toHaveBeenCalled();
+ *    const formData = args.onSubmit.mock.calls[0][0];
+ *    expect(formData).toEqual({
+ *      email: 'test@example.com',
+ *      password: 'password123',
+ *    });
+ *    ```
+ *
+ * 2. 呼び出し回数の検証
+ *    ```typescript
+ *    expect(args.onSubmit).toHaveBeenCalledTimes(1);
+ *    ```
+ *
+ * 3. イベントオブジェクトも検証したい場合
+ *    ```typescript
+ *    expect(args.onSubmit).toHaveBeenCalledWith(
+ *      { email: 'test@example.com', password: 'password123' },
+ *      expect.objectContaining({ type: 'submit' })
+ *    );
+ *    ```
  */
