@@ -72,6 +72,7 @@ const meta = {
   },
 
   // フォームを適切なサイズのコンテナで囲む
+  // https://storybook.js.org/docs/writing-stories/decorators
   decorators: [
     (Story) => (
       <div style={{ width: '400px', padding: '20px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
