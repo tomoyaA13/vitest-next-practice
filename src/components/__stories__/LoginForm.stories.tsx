@@ -1,5 +1,3 @@
-// src/components/__stories__/LoginForm.stories.tsx
-
 /**
  * フォームコンポーネントのStorybookファイル
  *
@@ -10,6 +8,48 @@
  * - react-hook-form: フォームの状態管理とバリデーション
  * - zod: スキーマベースのバリデーション
  * これらが連携して、型安全なフォームを実現しています。
+ *
+ * ■ TypeScriptを使用することによるStorybookでの恩恵
+ *
+ * 1. 【開発効率の向上】
+ *    - LoginFormコンポーネントのpropsを確認するために別ファイルを開く必要がありません
+ *    - onSubmitプロパティの型情報が自動補完され、引数の型も明確です
+ *    - 必須プロパティ（onSubmit）を忘れるとエディタが即座に警告します
+ *
+ * 2. 【自動的な型推論とControlsテーブル】
+ *    - LoginFormのonSubmitプロパティの型情報から、Controlsテーブルが自動生成されます
+ *    - argTypesでの追加設定により、より詳細な情報も提供できます
+ *
+ * 3. 【ゼロ設定での利用開始】
+ *    - このファイルには特別なTypeScript設定は不要で、すぐに型の恩恵を受けられます
+ *
+ * 4. 【Meta<typeof LoginForm>による型安全性】
+ *    ```typescript
+ *    const meta = { ... } satisfies Meta<typeof LoginForm>;
+ *    ```
+ *    - LoginFormに存在しないプロパティを指定するとエラーになります
+ *    - args.onSubmitの型が自動的に推論され、play関数内でも型安全に使用できます
+ *
+ * 5. 【satisfies演算子による厳密な型チェック】
+ *    - onSubmitが必須プロパティなので、定義を忘れるとエラーになります
+ *    - play関数内でargs.onSubmitを使用する際、undefinedの可能性を考慮する必要がありません
+ *    - StoryObj<typeof meta>により、metaレベルで定義したargsも考慮されます
+ *
+ * 6. 【play関数での型安全性】
+ *    ```typescript
+ *    play: async ({ canvasElement, args }) => { ... }
+ *    ```
+ *    - canvasElementはHTMLElement型として推論されます
+ *    - argsはLoginFormのprops型を含み、args.onSubmitの型も正確です
+ *    - within()、userEvent、expectなどの関数も型付けされています
+ *
+ * 7. 【モック関数の型情報】
+ *    ```typescript
+ *    onSubmit: fn((data) => { ... })
+ *    ```
+ *    - fn()でラップされたモック関数も型情報を保持します
+ *    - toHaveBeenCalledWith()でのアサーション時も型チェックが効きます
+ *    - mock.callsの型も正確で、引数の型情報にアクセスできます
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
