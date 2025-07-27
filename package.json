@@ -13,7 +13,10 @@
     "msw:init": "msw init public/ --save",
     "msw:dev": "MSW_MODE=development next dev --turbopack",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
