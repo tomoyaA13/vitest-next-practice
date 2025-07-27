@@ -6,7 +6,7 @@ test.describe('Fixturesの実践例（実際に動作する例）', () => {
     await page.goto('/');
     
     // 実際に存在する要素を確認
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Home');
     await expect(page.getByRole('link', { name: 'About' })).toBeVisible();
   });
 
@@ -16,7 +16,7 @@ test.describe('Fixturesの実践例（実際に動作する例）', () => {
     // Aboutページへ移動
     await page.getByRole('link', { name: 'About' }).click();
     await expect(page).toHaveURL('/about');
-    await expect(page.locator('h1')).toContainText('About');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('About');
     
     // ホームに戻る
     await page.getByRole('link', { name: 'Home' }).click();
@@ -32,8 +32,8 @@ test.describe('Fixturesの実践例（実際に動作する例）', () => {
     await page2.goto('/about');
     
     // それぞれのページで確認
-    await expect(page1.locator('h1')).toContainText('Home');
-    await expect(page2.locator('h1')).toContainText('About');
+    await expect(page1.getByRole('heading', { level: 1 })).toContainText('Home');
+    await expect(page2.getByRole('heading', { level: 1 })).toContainText('About');
   });
 
   test('ブラウザごとの動作確認', async ({ page, browserName }) => {
@@ -42,7 +42,7 @@ test.describe('Fixturesの実践例（実際に動作する例）', () => {
     console.log(`${browserName}でテスト実行中`);
     
     // ブラウザに関係なく動作する基本的なテスト
-    const heading = await page.locator('h1').textContent();
+    const heading = await page.getByRole('heading', { level: 1 }).textContent();
     expect(heading).toBe('Home');
   });
 });
@@ -51,9 +51,9 @@ test.describe('Fixturesの実践例（実際に動作する例）', () => {
 test.describe.skip('将来実装予定の機能のテスト例', () => {
   test('ログインテスト（実装後に有効化）', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'password123');
-    await page.click('button[type="submit"]');
+    await page.getByLabel('Email').fill('test@example.com');
+    await page.getByLabel('Password').fill('password123');
+    await page.getByRole('button', { name: 'Submit' }).click();
     await expect(page).toHaveURL('/dashboard');
   });
 

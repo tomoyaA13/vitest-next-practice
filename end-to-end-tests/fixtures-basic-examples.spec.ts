@@ -11,7 +11,7 @@ test.describe('Fixturesの基本を理解する', () => {
     console.log('ページタイトル:', title);
     
     // h1要素の確認
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Home');
     
     // このテストが終わると、pageは自動的に閉じられる
   });
@@ -28,7 +28,7 @@ test.describe('Fixturesの基本を理解する', () => {
     }
     
     // 共通の確認
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
   // contextを使って複数のページを扱う例
@@ -42,8 +42,8 @@ test.describe('Fixturesの基本を理解する', () => {
     await page2.goto('/about');
     
     // それぞれのページで確認
-    await expect(page1.locator('h1')).toContainText('Home');
-    await expect(page2.locator('h1')).toContainText('About');
+    await expect(page1.getByRole('heading', { level: 1 })).toContainText('Home');
+    await expect(page2.getByRole('heading', { level: 1 })).toContainText('About');
     
     // 両方のページは自動的に閉じられる
   });
@@ -65,15 +65,15 @@ test.describe('Fixturesの基本を理解する', () => {
   test('実践的な例：複数ページのナビゲーション', async ({ page, context }) => {
     // メインページ
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText('Home');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Home');
     
     // 新しいタブでAboutページを開く
     const aboutPage = await context.newPage();
     await aboutPage.goto('/about');
     
     // 両方のページで動作確認
-    await expect(page.locator('h1')).toContainText('Home');
-    await expect(aboutPage.locator('h1')).toContainText('About');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Home');
+    await expect(aboutPage.getByRole('heading', { level: 1 })).toContainText('About');
     
     // メインページからAboutへ移動
     await page.getByRole('link', { name: 'About' }).click();

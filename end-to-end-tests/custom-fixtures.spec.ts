@@ -28,7 +28,7 @@ export const test = base.extend<MyFixtures>({
     await page.goto('/about');
     
     // ページが読み込まれたことを確認
-    await expect(page.locator('h1')).toContainText('About');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('About');
     
     // 設定済みのページを提供
     await use(page);
@@ -38,7 +38,7 @@ export const test = base.extend<MyFixtures>({
 // カスタムFixturesを使った実際に動作するテスト
 test('Aboutページのカスタムフィクスチャー', async ({ aboutPage }) => {
   // すでにAboutページに移動済み
-  const heading = await aboutPage.locator('h1').textContent();
+  const heading = await aboutPage.getByRole('heading', { level: 1 }).textContent();
   expect(heading).toBe('About');
   
   // ホームページへのリンクが存在することを確認
@@ -65,9 +65,9 @@ test.describe.skip('ログイン機能実装後のカスタムFixture例', () =>
     authenticatedPage: async ({ page }, use) => {
       // ログイン処理
       await page.goto('/login');
-      await page.fill('input[name="email"]', 'test@example.com');
-      await page.fill('input[name="password"]', 'password123');
-      await page.click('button[type="submit"]');
+      await page.getByLabel('Email').fill('test@example.com');
+      await page.getByLabel('Password').fill('password123');
+      await page.getByRole('button', { name: 'Login' }).click();
       await page.waitForURL('/dashboard');
       
       // ログイン済みのページを提供
