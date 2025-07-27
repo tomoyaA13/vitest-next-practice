@@ -7,7 +7,10 @@ test.describe('ホームページ', () => {
     await page.goto('/');
 
     // h1タグでHomeというテキストが表示されていることを確認
-    await expect(page.locator('h1')).toContainText('Home');
+    // Playwrightドキュメントの推奨に従い、CSSセレクターではなくroleロケーターを使用
+    // roleロケーターはアクセシビリティ属性に基づいており、より堅牢なテストになります
+    // h1要素は暗黙的に'heading'ロールを持ち、level: 1で特定できます
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Home');
 
     // Aboutリンクが表示されていることを確認
     const aboutLink = page.getByRole('link', { name: 'About' });
