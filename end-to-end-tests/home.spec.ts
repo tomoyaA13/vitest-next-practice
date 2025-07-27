@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 
+// https://playwright.dev/docs/writing-tests
 test.describe('ホームページ', () => {
   test('タイトルとリンクが表示される', async ({ page }) => {
     // ホームページに移動

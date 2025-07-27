@@ -12,27 +12,40 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  // テストファイルが格納されているディレクトリ
   testDir: './end-to-end-tests',
-  /* Run tests in files in parallel */
+  
+  // テストファイル内のテストを並列実行するかどうか
+  // trueの場合、各テストファイル内のテストが並列に実行される
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  
+  // CI環境でtest.onlyが残っていた場合にビルドを失敗させる
+  // 本番環境に特定のテストのみ実行するコードが残るのを防ぐ
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
+  
+  // テスト失敗時のリトライ回数
+  // CI環境では2回まで再試行、ローカルでは再試行なし
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
+  
+  // 並列実行するワーカー数
+  // CI環境では1つ（安定性重視）、ローカルでは自動設定
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  
+  // テスト結果のレポート形式
+  // 'html'レポートは視覚的にテスト結果を確認できる
   reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  
+  /* すべてのプロジェクトで共有される設定 */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
+    /* page.goto('/')のような相対パスで使用されるベースURL */
     baseURL: 'http://localhost:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    /* 失敗したテストを再実行する際にトレースを収集 */
+    // トレースはテストの実行過程を記録し、デバッグに役立つ
     trace: 'on-first-retry',
   },
 
-  /* Configure projects for major browsers */
+  /* 各ブラウザでのテスト設定 */
   projects: [
     {
       name: 'chromium',
@@ -49,7 +62,7 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
 
-    /* Test against mobile viewports. */
+    /* モバイルデバイスでのテスト設定（コメントアウト中） */
     // {
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },
@@ -59,7 +72,7 @@ export default defineConfig({
     //   use: { ...devices['iPhone 12'] },
     // },
 
-    /* Test against branded browsers. */
+    /* 特定のブラウザチャンネルでのテスト（コメントアウト中） */
     // {
     //   name: 'Microsoft Edge',
     //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
@@ -70,11 +83,20 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
+  /* テスト実行前に開発サーバーを自動起動する設定 */
   webServer: {
+    // 開発サーバーを起動するコマンド
     command: 'pnpm run dev',
+    
+    // サーバーが起動したことを確認するURL
     url: 'http://localhost:3000',
+    
+    // 既存のサーバーがある場合は再利用する
+    // CI環境では常に新しくサーバーを起動
     reuseExistingServer: !process.env.CI,
+    
+    // サーバー起動のタイムアウト時間（ミリ秒）
+    // 2分間待機してもサーバーが起動しない場合はエラー
     timeout: 120 * 1000,
   },
 });
