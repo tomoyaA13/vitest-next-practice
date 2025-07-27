@@ -37,7 +37,7 @@ import { test, expect } from '@playwright/test';
  * - <input type="checkbox"> → role="checkbox"
  */
 
-https: test.describe('ホームページ', () => {
+test.describe('ホームページ', () => {
   test('タイトルとリンクが表示される', async ({ page }) => {
     // ホームページに移動
     await page.goto('/');
