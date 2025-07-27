@@ -33,7 +33,7 @@ export const test = base.extend<MyFixtures>({
       defaultTimeout: 5000,
     };
 
-    // use()でテストに設定を提供
+    // await use() の引数には、そのfixtureがテストに提供したい値を渡します。
     // use()の前がセットアップ、後がティアダウン
     await use(config);
 
