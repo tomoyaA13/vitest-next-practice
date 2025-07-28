@@ -2,8 +2,10 @@ name: Vitest Tests
 
 # トリガー条件
 on:
+  # 全てのブランチへのpushで実行
   push:
-    branches: [ main, master ]
+    branches: '*'
+  # mainとmasterブランチへのプルリクエストで実行
   pull_request:
     branches: [ main, master ]
 
