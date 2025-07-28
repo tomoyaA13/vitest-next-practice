@@ -4,7 +4,8 @@ name: Vitest Tests
 on:
   # 全てのブランチへのpushで実行
   push:
-    branches: [ '*' ]
+    branches:
+      - '**'
   # mainとmasterブランチへのプルリクエストで実行
   pull_request:
     branches: [ main, master ]
