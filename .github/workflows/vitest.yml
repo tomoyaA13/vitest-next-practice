@@ -4,7 +4,7 @@ name: Vitest Tests
 on:
   # 全てのブランチへのpushで実行
   push:
-    branches: '*'
+    branches: [ '*' ]
   # mainとmasterブランチへのプルリクエストで実行
   pull_request:
     branches: [ main, master ]
@@ -16,74 +16,74 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    # リポジトリのチェックアウト
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      # リポジトリのチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # Node.jsのセットアップ
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 'lts/*'
-        
-    # pnpmのインストール
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 10
-        run_install: false
+      # Node.jsのセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
 
-    # pnpmストアパスの取得（キャッシュ用）
-    - name: Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      # pnpmのインストール
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
 
-    # 依存関係のキャッシュ
-    - name: Setup pnpm cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+      # pnpmストアパスの取得（キャッシュ用）
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-    # 依存関係のインストール
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      # 依存関係のキャッシュ
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
-    # 型チェック
-    - name: Type check
-      run: pnpm tsc --noEmit
+      # 依存関係のインストール
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-    # リンターの実行
-    - name: Run ESLint
-      run: pnpm lint
+      # 型チェック
+      - name: Type check
+        run: pnpm tsc --noEmit
 
-    # テストの実行（カバレッジ付き）
-    - name: Run Vitest tests
-      run: pnpm test:coverage
+      # リンターの実行
+      - name: Run ESLint
+        run: pnpm lint
 
-    # Storybook向けのVitestテスト
-    - name: Install Playwright for Storybook tests
-      run: pnpm exec playwright install --with-deps chromium
+      # テストの実行（カバレッジ付き）
+      - name: Run Vitest tests
+        run: pnpm test:coverage
 
-    # カバレッジレポートのアップロード
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-report
-        path: coverage/
-        retention-days: 30
+      # Storybook向けのVitestテスト
+      - name: Install Playwright for Storybook tests
+        run: pnpm exec playwright install --with-deps chromium
 
-    # PRにカバレッジコメントを追加（オプション）
-    - name: Coverage Report
-      uses: davelosert/vitest-coverage-report-action@v2
-      if: github.event_name == 'pull_request'
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        vite-config-path: ./vitest.config.mts
+      # カバレッジレポートのアップロード
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+      # PRにカバレッジコメントを追加（オプション）
+      - name: Coverage Report
+        uses: davelosert/vitest-coverage-report-action@v2
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vite-config-path: ./vitest.config.mts
 
   # ビルドのテスト（別ジョブ）
   build:
@@ -91,45 +91,45 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 'lts/*'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@v3
-      with:
-        version: 9
-        run_install: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
 
-    - name: Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-    - name: Setup pnpm cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-    # Next.jsビルドのテスト
-    - name: Build Next.js application
-      run: pnpm build
+      # Next.jsビルドのテスト
+      - name: Build Next.js application
+        run: pnpm build
 
-    # ビルド成果物のアップロード（オプション）
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      if: github.event_name == 'push'
-      with:
-        name: nextjs-build
-        path: .next/
-        retention-days: 7
+      # ビルド成果物のアップロード（オプション）
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: nextjs-build
+          path: .next/
+          retention-days: 7
